@@ -6,5 +6,5 @@ The script requires openpyxl module to be installed on your Linux box, this vers
 
 openpyxl can be installed with "pip3 install openpyxl" 
 
-I'm a Python novice, please be gentle...
+Don't hesitate to post your comments but be gentle, I'm a Python novice...
 
