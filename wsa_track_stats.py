@@ -6,13 +6,19 @@
 #  Copyright 2019 Hans Combee (hanscombee@gmail.com)
 #
 #  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License.
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
 #
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
 #
 #
 import time
@@ -47,157 +53,308 @@ wb = Workbook()
 def process_file(proc_file):
 	""" reads the logs line by line and puts each counter in a seperate file"""
 	print("Processing ",proc_file)
-
-	with gzip.open(proc_file,'rt') as f:
-		count=1
-		line = f.readline()
-		while line:
-			if 'Current Date' in line:
-				timestamp = datetime.strptime(line[19:39],"%d %b %Y %H:%M:%S")
-				client_list = [timestamp]
-				hit_list = [timestamp]
-				miss_list = [timestamp]
-				stt_list = [timestamp]
-				swt_list = [timestamp]
-				dns_list = [timestamp]
-				auth_list = [timestamp]
-				auth_serv_list = [timestamp]
-				wbrs_wait_list = [timestamp]
-				wbrs_serv_list = [timestamp]
-				webroot_rqh_list = [timestamp]
-				webroot_rsb_list = [timestamp]
-				mcafee_res_list = [timestamp]
-				sophos_res_list = [timestamp]
-								
-			elif 'Client Time' in line:
-				q_count = int(line.split()[4])
-				client_list.append(q_count)
-				if len(client_list) == 21:
-					client_reqs = 0
-					for x in range(1, len(client_list)):
-						client_reqs = client_reqs + client_list[x]
-					client_list.append(client_reqs)
-					write_stats('client_time_stats.csv',client_list)
-			elif 'Hit Time' in line:
-				q_count = int(line.split()[4])
-				hit_list.append(q_count)
-				if len(hit_list) == 21:
-					hit_reqs = 0
-					for x in range(1, len(hit_list)):
-						hit_reqs = hit_reqs + hit_list[x]
-					hit_list.append(hit_reqs)
-					write_stats('hit_time_stats.csv',hit_list)
-			elif 'Miss Time' in line:
-				q_count = int(line.split()[4])
-				miss_list.append(q_count)
-				if len(miss_list) == 21:
-					miss_reqs = 0
-					for x in range(1, len(miss_list)):
-						miss_reqs = miss_reqs + miss_list[x]
-					miss_list.append(miss_reqs)
-					write_stats('miss_time_stats.csv',miss_list)
-			elif 'Server Transaction Time' in line:
-				q_count = int(line.split()[5])
-				stt_list.append(q_count)
-				if len(stt_list) == 21:
-					stt_reqs = 0
-					for x in range(1, len(stt_list)):
-						stt_reqs = stt_reqs + stt_list[x]
-					stt_list.append(stt_reqs)
-					write_stats('stt_time_stats.csv',stt_list)
-			elif 'Server Wait Time' in line:
-				q_count = int(line.split()[5])
-				swt_list.append(q_count)
-				if len(swt_list) == 21:
-					swt_reqs = 0
-					for x in range(1, len(swt_list)):
-						swt_reqs = swt_reqs + swt_list[x]
-					swt_list.append(swt_reqs)
-					write_stats('swt_time_stats.csv',swt_list)
-			elif 'DNS Time' in line:
-				q_count = int(line.split()[4])
-				dns_list.append(q_count)
-				if len(dns_list) == 21:
-					dns_reqs = 0
-					for x in range(1, len(dns_list)):
-						dns_reqs = dns_reqs + dns_list[x]
-					dns_list.append(dns_reqs)
-					write_stats('dns_stats.csv',dns_list)
-			elif 'Auth Helper Wait Time' in line:
-				q_count = int(line.split()[6])
-				auth_list.append(q_count)
-				if len(auth_list) == 21:
-					auth_reqs = 0
-					for x in range(1, len(auth_list)):
-						auth_reqs = auth_reqs + auth_list[x]
-					auth_list.append(auth_reqs)
-					write_stats('auth_helper_wait.csv',auth_list)
-			elif 'Auth Helper Service Time' in line:
-				q_count = int(line.split()[6])
-				auth_serv_list.append(q_count)
-				if len(auth_serv_list) == 21:
-					auth_serv_reqs = 0
-					for x in range(1, len(auth_serv_list)):
-						auth_serv_reqs = auth_serv_reqs + auth_serv_list[x]
-					auth_serv_list.append(auth_serv_reqs)
-					write_stats('auth_serv_helper_wait.csv',auth_serv_list)
-			elif 'WBRS Wait Time' in line:
-				q_count = int(line.split()[5])
-				wbrs_wait_list.append(q_count)
-				if len(wbrs_wait_list) == 21:
-					wbrs_wait_reqs = 0
-					for x in range(1, len(wbrs_wait_list)):
-						wbrs_wait_reqs = wbrs_wait_reqs + wbrs_wait_list[x]
-					wbrs_wait_list.append(wbrs_wait_reqs)
-					write_stats('wbrs_wait_stats.csv',wbrs_wait_list)
-			elif 'WBRS Service Time' in line:
-				q_count = int(line.split()[5])
-				wbrs_serv_list.append(q_count)
-				if len(wbrs_serv_list) == 21:
-					wbrs_serv_reqs = 0
-					for x in range(1, len(wbrs_serv_list)):
-						wbrs_serv_reqs = wbrs_serv_reqs + wbrs_serv_list[x]
-					wbrs_serv_list.append(wbrs_serv_reqs)
-					write_stats('wbrs_serv_stats.csv',wbrs_serv_list)
-			elif 'Webroot Request Header Service Time' in line:
-				q_count = int(line.split()[7])
-				webroot_rqh_list.append(q_count)
-				if len(webroot_rqh_list) == 21:
-					webroot_rqh_reqs = 0
-					for x in range(1, len(webroot_rqh_list)):
-						webroot_rqh_reqs = webroot_rqh_reqs + webroot_rqh_list[x]
-					webroot_rqh_list.append(webroot_rqh_reqs)
-					write_stats('webroot_rqh_stats.csv',webroot_rqh_list)
-			elif 'Webroot Response Body Service Time' in line:
-				q_count = int(line.split()[7])
-				webroot_rsb_list.append(q_count)
-				if len(webroot_rsb_list) == 21:
-					webroot_rsb_reqs = 0
-					for x in range(1, len(webroot_rsb_list)):
-						webroot_rsb_reqs = webroot_rsb_reqs + webroot_rsb_list[x]
-					webroot_rsb_list.append(webroot_rsb_reqs)
-					write_stats('webroot_rsb_stats.csv',webroot_rsb_list)
-			elif 'McAfee Response Body Service Time' in line:
-				q_count = int(line.split()[7])
-				mcafee_res_list.append(q_count)
-				if len(mcafee_res_list) == 21:
-					mcafee_res_reqs = 0
-					for x in range(1, len(mcafee_res_list)):
-						mcafee_res_reqs = mcafee_res_reqs + mcafee_res_list[x]
-					mcafee_res_list.append(mcafee_res_reqs)
-					write_stats('mcafee_res_stats.csv',mcafee_res_list)
-			elif 'Sophos Response Body Service Time' in line:
-				q_count = int(line.split()[7])
-				sophos_res_list.append(q_count)
-				if len(sophos_res_list) == 21:
-					sophos_res_reqs = 0
-					for x in range(1, len(sophos_res_list)):
-						sophos_res_reqs = sophos_res_reqs + sophos_res_list[x]
-					sophos_res_list.append(sophos_res_reqs)
-					write_stats('sophos_res_stats.csv',sophos_res_list)
-			
+	if "gz" in proc_file:
+		with gzip.open(proc_file,'rt') as f:
+			count=1
 			line = f.readline()
-			count += 1
+			while line:
+				if 'Current Date' in line:
+					timestamp = datetime.strptime(line[19:39],"%d %b %Y %H:%M:%S")
+					client_list = [timestamp]
+					hit_list = [timestamp]
+					miss_list = [timestamp]
+					stt_list = [timestamp]
+					swt_list = [timestamp]
+					dns_list = [timestamp]
+					auth_list = [timestamp]
+					auth_serv_list = [timestamp]
+					wbrs_wait_list = [timestamp]
+					wbrs_serv_list = [timestamp]
+					webroot_rqh_list = [timestamp]
+					webroot_rsb_list = [timestamp]
+					mcafee_res_list = [timestamp]
+					sophos_res_list = [timestamp]
+									
+				elif 'Client Time' in line:
+					q_count = int(line.split()[4])
+					client_list.append(q_count)
+					if len(client_list) == 21:
+						client_reqs = 0
+						for x in range(1, len(client_list)):
+							client_reqs = client_reqs + client_list[x]
+						client_list.append(client_reqs)
+						write_stats('client_time_stats.csv',client_list)
+				elif 'Hit Time' in line:
+					q_count = int(line.split()[4])
+					hit_list.append(q_count)
+					if len(hit_list) == 21:
+						hit_reqs = 0
+						for x in range(1, len(hit_list)):
+							hit_reqs = hit_reqs + hit_list[x]
+						hit_list.append(hit_reqs)
+						write_stats('hit_time_stats.csv',hit_list)
+				elif 'Miss Time' in line:
+					q_count = int(line.split()[4])
+					miss_list.append(q_count)
+					if len(miss_list) == 21:
+						miss_reqs = 0
+						for x in range(1, len(miss_list)):
+							miss_reqs = miss_reqs + miss_list[x]
+						miss_list.append(miss_reqs)
+						write_stats('miss_time_stats.csv',miss_list)
+				elif 'Server Transaction Time' in line:
+					q_count = int(line.split()[5])
+					stt_list.append(q_count)
+					if len(stt_list) == 21:
+						stt_reqs = 0
+						for x in range(1, len(stt_list)):
+							stt_reqs = stt_reqs + stt_list[x]
+						stt_list.append(stt_reqs)
+						write_stats('stt_time_stats.csv',stt_list)
+				elif 'Server Wait Time' in line:
+					q_count = int(line.split()[5])
+					swt_list.append(q_count)
+					if len(swt_list) == 21:
+						swt_reqs = 0
+						for x in range(1, len(swt_list)):
+							swt_reqs = swt_reqs + swt_list[x]
+						swt_list.append(swt_reqs)
+						write_stats('swt_time_stats.csv',swt_list)
+				elif 'DNS Time' in line:
+					q_count = int(line.split()[4])
+					dns_list.append(q_count)
+					if len(dns_list) == 21:
+						dns_reqs = 0
+						for x in range(1, len(dns_list)):
+							dns_reqs = dns_reqs + dns_list[x]
+						dns_list.append(dns_reqs)
+						write_stats('dns_stats.csv',dns_list)
+				elif 'Auth Helper Wait Time' in line:
+					q_count = int(line.split()[6])
+					auth_list.append(q_count)
+					if len(auth_list) == 21:
+						auth_reqs = 0
+						for x in range(1, len(auth_list)):
+							auth_reqs = auth_reqs + auth_list[x]
+						auth_list.append(auth_reqs)
+						write_stats('auth_helper_wait.csv',auth_list)
+				elif 'Auth Helper Service Time' in line:
+					q_count = int(line.split()[6])
+					auth_serv_list.append(q_count)
+					if len(auth_serv_list) == 21:
+						auth_serv_reqs = 0
+						for x in range(1, len(auth_serv_list)):
+							auth_serv_reqs = auth_serv_reqs + auth_serv_list[x]
+						auth_serv_list.append(auth_serv_reqs)
+						write_stats('auth_serv_helper_wait.csv',auth_serv_list)
+				elif 'WBRS Wait Time' in line:
+					q_count = int(line.split()[5])
+					wbrs_wait_list.append(q_count)
+					if len(wbrs_wait_list) == 21:
+						wbrs_wait_reqs = 0
+						for x in range(1, len(wbrs_wait_list)):
+							wbrs_wait_reqs = wbrs_wait_reqs + wbrs_wait_list[x]
+						wbrs_wait_list.append(wbrs_wait_reqs)
+						write_stats('wbrs_wait_stats.csv',wbrs_wait_list)
+				elif 'WBRS Service Time' in line:
+					q_count = int(line.split()[5])
+					wbrs_serv_list.append(q_count)
+					if len(wbrs_serv_list) == 21:
+						wbrs_serv_reqs = 0
+						for x in range(1, len(wbrs_serv_list)):
+							wbrs_serv_reqs = wbrs_serv_reqs + wbrs_serv_list[x]
+						wbrs_serv_list.append(wbrs_serv_reqs)
+						write_stats('wbrs_serv_stats.csv',wbrs_serv_list)
+				elif 'Webroot Request Header Service Time' in line:
+					q_count = int(line.split()[7])
+					webroot_rqh_list.append(q_count)
+					if len(webroot_rqh_list) == 21:
+						webroot_rqh_reqs = 0
+						for x in range(1, len(webroot_rqh_list)):
+							webroot_rqh_reqs = webroot_rqh_reqs + webroot_rqh_list[x]
+						webroot_rqh_list.append(webroot_rqh_reqs)
+						write_stats('webroot_rqh_stats.csv',webroot_rqh_list)
+				elif 'Webroot Response Body Service Time' in line:
+					q_count = int(line.split()[7])
+					webroot_rsb_list.append(q_count)
+					if len(webroot_rsb_list) == 21:
+						webroot_rsb_reqs = 0
+						for x in range(1, len(webroot_rsb_list)):
+							webroot_rsb_reqs = webroot_rsb_reqs + webroot_rsb_list[x]
+						webroot_rsb_list.append(webroot_rsb_reqs)
+						write_stats('webroot_rsb_stats.csv',webroot_rsb_list)
+				elif 'McAfee Response Body Service Time' in line:
+					q_count = int(line.split()[7])
+					mcafee_res_list.append(q_count)
+					if len(mcafee_res_list) == 21:
+						mcafee_res_reqs = 0
+						for x in range(1, len(mcafee_res_list)):
+							mcafee_res_reqs = mcafee_res_reqs + mcafee_res_list[x]
+						mcafee_res_list.append(mcafee_res_reqs)
+						write_stats('mcafee_res_stats.csv',mcafee_res_list)
+				elif 'Sophos Response Body Service Time' in line:
+					q_count = int(line.split()[7])
+					sophos_res_list.append(q_count)
+					if len(sophos_res_list) == 21:
+						sophos_res_reqs = 0
+						for x in range(1, len(sophos_res_list)):
+							sophos_res_reqs = sophos_res_reqs + sophos_res_list[x]
+						sophos_res_list.append(sophos_res_reqs)
+						write_stats('sophos_res_stats.csv',sophos_res_list)
+				
+				line = f.readline()
+				count += 1
+	else:
+		with open(proc_file,'rt') as f:
+			count=1
+			line = f.readline()
+			while line:
+				if 'Current Date' in line:
+					timestamp = datetime.strptime(line[19:39],"%d %b %Y %H:%M:%S")
+					client_list = [timestamp]
+					hit_list = [timestamp]
+					miss_list = [timestamp]
+					stt_list = [timestamp]
+					swt_list = [timestamp]
+					dns_list = [timestamp]
+					auth_list = [timestamp]
+					auth_serv_list = [timestamp]
+					wbrs_wait_list = [timestamp]
+					wbrs_serv_list = [timestamp]
+					webroot_rqh_list = [timestamp]
+					webroot_rsb_list = [timestamp]
+					mcafee_res_list = [timestamp]
+					sophos_res_list = [timestamp]
+									
+				elif 'Client Time' in line:
+					q_count = int(line.split()[4])
+					client_list.append(q_count)
+					if len(client_list) == 21:
+						client_reqs = 0
+						for x in range(1, len(client_list)):
+							client_reqs = client_reqs + client_list[x]
+						client_list.append(client_reqs)
+						write_stats('client_time_stats.csv',client_list)
+				elif 'Hit Time' in line:
+					q_count = int(line.split()[4])
+					hit_list.append(q_count)
+					if len(hit_list) == 21:
+						hit_reqs = 0
+						for x in range(1, len(hit_list)):
+							hit_reqs = hit_reqs + hit_list[x]
+						hit_list.append(hit_reqs)
+						write_stats('hit_time_stats.csv',hit_list)
+				elif 'Miss Time' in line:
+					q_count = int(line.split()[4])
+					miss_list.append(q_count)
+					if len(miss_list) == 21:
+						miss_reqs = 0
+						for x in range(1, len(miss_list)):
+							miss_reqs = miss_reqs + miss_list[x]
+						miss_list.append(miss_reqs)
+						write_stats('miss_time_stats.csv',miss_list)
+				elif 'Server Transaction Time' in line:
+					q_count = int(line.split()[5])
+					stt_list.append(q_count)
+					if len(stt_list) == 21:
+						stt_reqs = 0
+						for x in range(1, len(stt_list)):
+							stt_reqs = stt_reqs + stt_list[x]
+						stt_list.append(stt_reqs)
+						write_stats('stt_time_stats.csv',stt_list)
+				elif 'Server Wait Time' in line:
+					q_count = int(line.split()[5])
+					swt_list.append(q_count)
+					if len(swt_list) == 21:
+						swt_reqs = 0
+						for x in range(1, len(swt_list)):
+							swt_reqs = swt_reqs + swt_list[x]
+						swt_list.append(swt_reqs)
+						write_stats('swt_time_stats.csv',swt_list)
+				elif 'DNS Time' in line:
+					q_count = int(line.split()[4])
+					dns_list.append(q_count)
+					if len(dns_list) == 21:
+						dns_reqs = 0
+						for x in range(1, len(dns_list)):
+							dns_reqs = dns_reqs + dns_list[x]
+						dns_list.append(dns_reqs)
+						write_stats('dns_stats.csv',dns_list)
+				elif 'Auth Helper Wait Time' in line:
+					q_count = int(line.split()[6])
+					auth_list.append(q_count)
+					if len(auth_list) == 21:
+						auth_reqs = 0
+						for x in range(1, len(auth_list)):
+							auth_reqs = auth_reqs + auth_list[x]
+						auth_list.append(auth_reqs)
+						write_stats('auth_helper_wait.csv',auth_list)
+				elif 'Auth Helper Service Time' in line:
+					q_count = int(line.split()[6])
+					auth_serv_list.append(q_count)
+					if len(auth_serv_list) == 21:
+						auth_serv_reqs = 0
+						for x in range(1, len(auth_serv_list)):
+							auth_serv_reqs = auth_serv_reqs + auth_serv_list[x]
+						auth_serv_list.append(auth_serv_reqs)
+						write_stats('auth_serv_helper_wait.csv',auth_serv_list)
+				elif 'WBRS Wait Time' in line:
+					q_count = int(line.split()[5])
+					wbrs_wait_list.append(q_count)
+					if len(wbrs_wait_list) == 21:
+						wbrs_wait_reqs = 0
+						for x in range(1, len(wbrs_wait_list)):
+							wbrs_wait_reqs = wbrs_wait_reqs + wbrs_wait_list[x]
+						wbrs_wait_list.append(wbrs_wait_reqs)
+						write_stats('wbrs_wait_stats.csv',wbrs_wait_list)
+				elif 'WBRS Service Time' in line:
+					q_count = int(line.split()[5])
+					wbrs_serv_list.append(q_count)
+					if len(wbrs_serv_list) == 21:
+						wbrs_serv_reqs = 0
+						for x in range(1, len(wbrs_serv_list)):
+							wbrs_serv_reqs = wbrs_serv_reqs + wbrs_serv_list[x]
+						wbrs_serv_list.append(wbrs_serv_reqs)
+						write_stats('wbrs_serv_stats.csv',wbrs_serv_list)
+				elif 'Webroot Request Header Service Time' in line:
+					q_count = int(line.split()[7])
+					webroot_rqh_list.append(q_count)
+					if len(webroot_rqh_list) == 21:
+						webroot_rqh_reqs = 0
+						for x in range(1, len(webroot_rqh_list)):
+							webroot_rqh_reqs = webroot_rqh_reqs + webroot_rqh_list[x]
+						webroot_rqh_list.append(webroot_rqh_reqs)
+						write_stats('webroot_rqh_stats.csv',webroot_rqh_list)
+				elif 'Webroot Response Body Service Time' in line:
+					q_count = int(line.split()[7])
+					webroot_rsb_list.append(q_count)
+					if len(webroot_rsb_list) == 21:
+						webroot_rsb_reqs = 0
+						for x in range(1, len(webroot_rsb_list)):
+							webroot_rsb_reqs = webroot_rsb_reqs + webroot_rsb_list[x]
+						webroot_rsb_list.append(webroot_rsb_reqs)
+						write_stats('webroot_rsb_stats.csv',webroot_rsb_list)
+				elif 'McAfee Response Body Service Time' in line:
+					q_count = int(line.split()[7])
+					mcafee_res_list.append(q_count)
+					if len(mcafee_res_list) == 21:
+						mcafee_res_reqs = 0
+						for x in range(1, len(mcafee_res_list)):
+							mcafee_res_reqs = mcafee_res_reqs + mcafee_res_list[x]
+						mcafee_res_list.append(mcafee_res_reqs)
+						write_stats('mcafee_res_stats.csv',mcafee_res_list)
+				elif 'Sophos Response Body Service Time' in line:
+					q_count = int(line.split()[7])
+					sophos_res_list.append(q_count)
+					if len(sophos_res_list) == 21:
+						sophos_res_reqs = 0
+						for x in range(1, len(sophos_res_list)):
+							sophos_res_reqs = sophos_res_reqs + sophos_res_list[x]
+						sophos_res_list.append(sophos_res_reqs)
+						write_stats('sophos_res_stats.csv',sophos_res_list)
+				
+				line = f.readline()
+				count += 1
 
 def write_stats(filename,line):
 	""" writes the 5 minute polls to a csv file"""
@@ -238,7 +395,6 @@ def deltas(filename,worksheet,header):
 				first = second
 
 def write_xlsx(worksheet,row):
-                """ puts the calculated deltas in an Excel Workbook with conditional formatting """
 		ws = wb[worksheet]
 		rule = DataBarRule(start_type='percentile', start_value=10, end_type='percentile', end_value='90',color="FF638EC6", showValue="None", minLength=None, maxLength=None)
 		ws.append(row)
@@ -266,9 +422,9 @@ def main(args):
 		print("Processing log files, depending on hardware this can take a few minutes")
 		print("")
 #		print(file_list)
-		while file_num >= 0:
-			if file_num == 0:
-				proc_file = "./prox_track.log.gz"
+		while file_num >= -1:
+			if file_num == -1:
+				proc_file = "./prox_track.log"
 			else:
 				proc_file = "./prox_track.log."+str(file_num)+".gz"
 			if proc_file in file_list:
