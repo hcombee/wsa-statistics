@@ -20,13 +20,17 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #
-#
+# Version history
+# 0.95  	removed conditional formatting for each row to greatly improve speed
+#			added calculated average in the last column of each worksheet	
+
 import time
 import os
 import gzip
 import csv
 from openpyxl import Workbook
 from openpyxl.formatting.rule import DataBarRule
+#from openpyxl.formatting.rule import ColorScaleRule
 from glob import glob
 from datetime import datetime
 
@@ -46,8 +50,8 @@ front_page = [['Client time','Total time that the client was waiting until his r
 ['Service Queue Time','Time that the object stayed in the queue to be scanned'],
 ['Adaptive Scanning Service Time','Time for the adaptive scanning process to scan an object']]
 
-header_l = ['Date/Time',1.0,1.6,2.5,4.0,6.3,10,15.8,25.1,39.8,63.1,100,158.5,251.2,398.1,631,1000,1584.9,2511.9,3981.1,6309.6,'Total requests']
-header_h = ['Date/Time',10,14.6,21.4,31.3,45.7,66.9,97.8,143,209.1,305.8,447.2,654,956.4,1398.5,2045.1,2990.7,4373.4,6395.5,9352.5,13676.6,'Total requests']
+header_l = ['Date/Time',1.0,1.6,2.5,4.0,6.3,10,15.8,25.1,39.8,63.1,100,158.5,251.2,398.1,631,1000,1584.9,2511.9,3981.1,6309.6,'Total requests','Average (ms)']
+header_h = ['Date/Time',10,14.6,21.4,31.3,45.7,66.9,97.8,143,209.1,305.8,447.2,654,956.4,1398.5,2045.1,2990.7,4373.4,6395.5,9352.5,13676.6,'Total requests','Average (ms)']
 wb = Workbook()
 
 def process_file(proc_file):
@@ -388,20 +392,44 @@ def deltas(filename,worksheet,header):
 				after wich the second row becomes the first row for the next
 				calcultation"""
 				delta = []
+				total_wait = 0
+				average_wait = 0.0
 				delta.append(second[0])
+#				print("List_length ",len(second))
 				for x in range (1, len(second)):
 					delta.append(int(second[x]) - int(first[x]))
+				""" Calculate average """
+#				print(delta,len(delta))
+				for x in range (1, len(delta) - 1):
+#					print(header[x]," - ",delta[x])
+					total_wait = total_wait + (int(delta[x])*header[x])
+#				print(total_wait,type(total_wait),average_wait,type(average_wait))
+				total_reqs = int(delta[len(delta)-1])
+				if total_reqs != 0:
+					average_wait = round((total_wait / total_reqs),0)
+					delta.append(average_wait)
 				write_xlsx(worksheet,delta)
 				first = second
+	format_xlsx(worksheet)
+		
 
 def write_xlsx(worksheet,row):
 		ws = wb[worksheet]
-		rule = DataBarRule(start_type='percentile', start_value=10, end_type='percentile', end_value='90',color="FF638EC6", showValue="None", minLength=None, maxLength=None)
+#		rule = DataBarRule(start_type='percentile', start_value=20, end_type='percentile', end_value='80',color="FF638EC6", showValue="None", minLength=None, maxLength=None)
 		ws.append(row)
+#		mr = ws.max_row
+#		cell_range = "B"+str(mr)+":U"+str(mr)
+#		ws.conditional_formatting.add(cell_range, rule)        
+    
+def format_xlsx(worksheet):
+		ws = wb[worksheet]
+		rule = DataBarRule(start_type='percentile', start_value=0, end_type='percentile', end_value=100 ,color="FF638EC6", showValue="None", minLength=None, maxLength=None)
+#		rule = ColorScaleRule(start_type='percentile', start_value=30, start_color='40FF00', mid_type='percentile', mid_value=60, mid_color='FFFF00', end_type='percentile', end_value=80, end_color='FF0000')		
 		mr = ws.max_row
-		cell_range = "B"+str(mr)+":U"+str(mr)
+		cell_range = "W2"+":W"+str(mr)
 		ws.conditional_formatting.add(cell_range, rule)        
-        
+		
+		
 
 def main(args):
 	print("")
@@ -416,7 +444,7 @@ def main(args):
 		print("Run this script in a directory containing these files")
 		print("")
 	elif output_exists:
-		print("Found existing statistics, using them instead")
+		print("Found existing csv files, using them instead")
 		time.sleep(2)
 	else:
 		print("Processing log files, depending on hardware this can take a few minutes")
