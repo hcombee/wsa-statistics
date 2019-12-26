@@ -3,7 +3,7 @@
 #
 #  wsa_track_stats.py
 #
-#  Copyright 2019 Hans Combee (hanscombee@gmail.com)
+#  Copyright 2019 Hans Combee
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
